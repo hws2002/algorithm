@@ -2,6 +2,7 @@
 #include "Brute_force.hpp"
 #include "Brute_force_improved.hpp"
 #include "Divide_and_Conquer.hpp"
+#include "Kadane.hpp"
 #include "constants.hpp"
 // 1sec = 1e6 microsec
 int main(){
@@ -45,6 +46,13 @@ int main(){
     duration = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
     std::cout<<"The algorithm took "<<duration<<" microseconds"<<std::endl;
 
+    /*-------Kadane Maxsum----------*/
+    start = std::chrono::high_resolution_clock::now();
+    if(Kadane_MaxSum(A)!=MIN)
+        printf("Largest sum of contiguous subarray : %d. Cannot provide index for this algorithm now \n",Kadane_MaxSum(A));
+    end = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+    std::cout<<"The algorithm took "<<duration<<" microseconds"<<std::endl;
 
     /**/
     return 0;
