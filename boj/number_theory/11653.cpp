@@ -14,6 +14,7 @@ void factorize(int N){
     }
     if(N!=1) cout<<N<<endl; // prime number
 };
+
 int main(){
     int N;
     cin>>N;
