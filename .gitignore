@@ -1,5 +1,6 @@
+.vscode
+settings.json
 .Ds_Store
 *.o
 *.out
-.vscode
 ref

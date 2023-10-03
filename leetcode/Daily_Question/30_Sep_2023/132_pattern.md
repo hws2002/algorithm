@@ -1,4 +1,4 @@
-## 456. 132 pattern
+# 456. 132 pattern
 [LeetCode - 456. 132 pattern](https://leetcode.com/problems/merge-sorted-array/description/?envType=study-plan-v2&envId=top-interview-150)
 ## Intuition
 
@@ -12,8 +12,7 @@
 132 패턴을 찾으려면, 주어진 배열의 길이가 n일때, 수열 <n,n-1,…,1]이 주어진 배열로 stack permutation 이 가능한지 알아보면된다.
 
 ### 알고리즘
-
-이건 다음과 같은 알고리즘으로 $O(n)$시간 안에 해결할 수 있다.
+다음과 같은 알고리즘으로 $O(n)$시간 안에 해결할 수 있다.
 
 ![S 는 보조 스택이다.](https://prod-files-secure.s3.us-west-2.amazonaws.com/50241e0d-1b54-4b6f-b668-fab4b01de234/ccf3412b-e273-4147-b3d8-3af9fac3679d/Untitled.png)
 
