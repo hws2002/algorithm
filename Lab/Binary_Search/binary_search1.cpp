@@ -4,7 +4,7 @@
 using namespace std;
 
 /***
- * @brief 二分查找
+ * @brief Binary Search - CONDITION1
  * @param vector<int> &A : a sorted vector of integers
  * @param x : the value to search for
  * @return int type index: A[i-1] < x <= A[i]인 i를 반환한다.
