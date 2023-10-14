@@ -11,9 +11,11 @@ using namespace std;
  * @remark A[-1] = -INF, A[n] = INF 
  * @remark A[i-1] < x <= A[i]인 i가 여러개인 경우 그 중 아무거나 반환한다.
  * @remark A[i-1] < x <= A[i]인 i가 없는 경우
- *          * x 가 A[n-1] 보다 클경우, n을
- *          * x 가 A[0] 보다 작을 경우, 0을 반한한다.
+ *          * A[j] < x 인  j중 최대값을 반환한다. 
+ *          * x 가 A[n-1] 보다 클경우, n-1을,
+ *          * x 가 A[0] 보다 작을 경우, -1를 반환한다.
 */
+// !TODO!
 int binsearch(const vector <int> & A, int x){
     int n = A.size();
     int lo = -1, hi = n;
@@ -24,7 +26,7 @@ int binsearch(const vector <int> & A, int x){
         else 
             hi = mid;
     }
-    return hi;
+    return hi-1;
 }
 
 int main(){
