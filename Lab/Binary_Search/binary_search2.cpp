@@ -13,7 +13,7 @@ int binsearch_less(const vector <int> & A, int x){
     int n = A.size();
     int lo = -1, hi = n;
     while(lo<=hi){
-
+        
     }
 
 }
