@@ -1,4 +1,4 @@
-# LAB : Comparison of Time complexity of different Algorithms
+# LAB : Comparison of Time complexity of different Algorithms on Partial Sum Problem
 ## 1. Introduction
 ### 1.1. Purpose of this lab
 - To understand and compare the time complexity of different algorithms
