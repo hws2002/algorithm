@@ -1,8 +1,10 @@
 .vscode/
 settings.json
-.Ds_Store
+.DS_Store
 *.o
 *.out
 ref
 
+
 program
+goorm.manifest
