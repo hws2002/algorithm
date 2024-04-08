@@ -38,9 +38,6 @@ public:
     }
 
     Rank insert(Rank r, T const& e) {
-        if (_size == _capacity) { // Check if the vector is full
-            // Handle resizing of the vector (not shown in this simplified example)
-        }
         for (Rank i = _size; i > r; --i)
             _elem[i] = _elem[i - 1];
         _elem[r] = e;
