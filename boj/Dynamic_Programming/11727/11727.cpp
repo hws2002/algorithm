@@ -19,8 +19,7 @@ int main(){
     //input
     int n;
     cin>>n;
-    
-    
+	
     //solve
     cout<<dp(n) % MOD<<endl;    
     return 0;

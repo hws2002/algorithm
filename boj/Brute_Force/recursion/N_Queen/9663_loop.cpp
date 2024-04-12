@@ -13,12 +13,12 @@ vector< pair<int, int> >::iterator iter;
 
 
 int main(){
-    //input
-    int N;
-    cin>>N;
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
+    //input
+    int N;
+    cin>>N;
     //solve
     int count = 0; bool can_put;
     int x,y; int i = 0; int j = 0; 
@@ -31,17 +31,14 @@ int main(){
                     can_put = false; break;
                 }
             }
-            
             if(can_put){
                 Vector_Pair_i_j.push_back({i,j});
                 if(Vector_Pair_i_j.size() == N){
                     count++;
                     Vector_Pair_i_j.pop_back();
-                    x = Vector_Pair_i_j.back().first;
-                    y = Vector_Pair_i_j.back().second;
+                    i = Vector_Pair_i_j.back().first;
+                    j = Vector_Pair_i_j.back().second;
                     Vector_Pair_i_j.pop_back();
-                    i = x;
-                    j = y;
 					// now go over j-loop again
                 } else {
                     i++; // go to next row
@@ -51,26 +48,24 @@ int main(){
                 // look for next possible position
                 // but if we are on the end of board
                 if( i == N-1 && j == N-1){
-                    x = Vector_Pair_i_j.back().first;
-                    y = Vector_Pair_i_j.back().second;
+                    i = Vector_Pair_i_j.back().first;
+                    j = Vector_Pair_i_j.back().second;
                     Vector_Pair_i_j.pop_back();
-                    i = x;
-                    j = y;
 					// now go over j-loop again
                 }
             }
         } // end j-loop
+		
         // stopper - optimizer
         if( N - Vector_Pair_i_j.size() > N - i - 1 ){
-            x = Vector_Pair_i_j.back().first;
-            y = Vector_Pair_i_j.back().second;
+            i = Vector_Pair_i_j.back().first - 1;
+            j = Vector_Pair_i_j.back().second + 1;
             Vector_Pair_i_j.pop_back();
-            i = x-1;
-            j = y+1;
 			if(i == -1 && j >=N) break;
         } else {
             j = 0;
         } // end stopper
+		
     } // end i
     
     cout<<count<<endl;
