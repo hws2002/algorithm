@@ -27,8 +27,10 @@ cout<<currentLength<<endl;
 #endif
     //base 
     if(path.size() == N){
-        return currentLength + W[path.back()][path[0]];
-    }
+		if(W[path.back()][path[0]])
+        	return currentLength + W[path.back()][path[0]];
+    	else return LLONG_MAX;
+	}
     ll ret = LLONG_MAX;
 
     // look for next city
