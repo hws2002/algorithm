@@ -24,7 +24,7 @@ int main(){
 		cout<<0<<endl;
 		return 0;
 	}
-	bool VISIT[100001] = {false};
+	bool VISIT[200001] = {false};
 	
 	//solve
 	Node * NodePosi;
@@ -45,22 +45,25 @@ int main(){
 		if(2*x == K){
 			break;
 		}
+		
+		// 2*x
+		if( 2*x <= 200000 && !VISIT[2*x]){
+			Queue_NodePosi.push(new Node(height, 2*x));
+			VISIT[2*x] = true;
+		}
+		
 		// x-1
 		if( 0<= x-1 && !VISIT[x-1]){
 			Queue_NodePosi.push(new Node(height+1, x-1));
 			VISIT[x-1] = true;
-		} 
+		}
 		
 		// x+1
-		if( x+1<=100000 && !VISIT[x+1]){
+		if( x+1 <= 200000 && !VISIT[x+1]){
 			Queue_NodePosi.push(new Node(height+1, x+1));
 			VISIT[x+1] = true;
 		} 
-		// 2*x
-		if( 2*x <= 100000 && !VISIT[2*x]){
-			Queue_NodePosi.push(new Node(height, 2*x));
-			VISIT[2*x] = true;
-		}
+
 	}
 	
 	while(!Queue_NodePosi.empty()){
