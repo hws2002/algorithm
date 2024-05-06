@@ -4,12 +4,8 @@
 #include <utility>
 #include <algorithm>
 #include <unordered_map>
-// #define DEBUG_DEDUP
-// #define DEBUG_SOLVE
 
 using namespace std;
-
-int N;
 
 vector< pair<int,int> > Meetings;
 vector< pair<int,int> > meetings;
@@ -25,9 +21,6 @@ bool compareFirst(const pair<int, int>& a, const pair<int, int>& b) {
 }
 
 int solve(const int idx){
-#ifdef DEBUG_SOLVE
-cout<<"idx : "<<idx<<endl;
-#endif
     if( idx >= meetings.size() ) return 0;
     if(cache.find(idx)!=cache.end()) return cache[idx];
 
@@ -35,20 +28,12 @@ cout<<"idx : "<<idx<<endl;
     int start = meetings[idx].first;
     while( idx + complement < meetings.size() && meetings[idx + complement].first == start && meetings[idx + complement].second == start) complement++;
 
-#ifdef DEBUG_SOLVE
-cout<<"idx + complement, meetings[idx + complement].first, meetings[idx + complement].second : "<<idx+complement<<" "<<meetings[idx + complement].first<<" "<<meetings[idx + complement].second<<endl;
-#endif
-
     if( idx + complement >= meetings.size() ){
         cache[idx] = complement;
         return complement;
     }
 
     if( meetings[idx + complement].first == start){
-        // meetings[idx+complement].second != start
-        // 2 2
-        // 2 3
-        // 4 7
         int end = meetings[idx+complement].second;
         auto iter = lower_bound(meetings.begin(), meetings.end(), make_pair(end,-1), compareFirst);
         if( iter == meetings.end()) {
@@ -60,10 +45,6 @@ cout<<"idx + complement, meetings[idx + complement].first, meetings[idx + comple
         cache[idx] = res;
         return res;
     } else {
-        // meetings[idx + complement].first != start
-        // 2 2
-        // 3 6 <- idx + complement
-        
         int res = complement + solve(idx + complement);
         cache[idx] = res;
         return res;
@@ -71,6 +52,7 @@ cout<<"idx + complement, meetings[idx + complement].first, meetings[idx + comple
 }
 
 int main(){
+    int N;
     cin>>N;
     int s,e;
     for(int i  = 0 ; i < N; i++){
@@ -100,30 +82,6 @@ int main(){
             i++;
         }
     }
-
-#ifdef DEBUG_DEDUP
-cout<<"printing out Meetings :"<<endl;
-for(auto item :Meetings){
-    cout<<item.first<<" ";
-}
-cout<<endl;
-
-for(auto item :Meetings){
-    cout<<item.second<<" ";
-}
-cout<<endl;
-
-cout<<"printing out meetings :"<<endl;
-for(auto item :meetings){
-    cout<<item.first<<" ";
-}
-cout<<endl;
-
-for(auto item :meetings){
-    cout<<item.second<<" ";
-}
-cout<<endl;
-#endif
     //solve
     cout<<solve(0)<<endl;
 
