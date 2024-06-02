@@ -7,7 +7,7 @@
 
 #define MAX_RC 52
 #define GOING2PURIFIER(x, y, a, b) ( (x==a) && (y==b)) 
-#define DEBUG_SIMUL
+// #define DEBUG_SIMUL
 using namespace std;
 
 struct Purifier{
@@ -66,8 +66,6 @@ void spread_moveDust(const int r, const int c, const int val){
     } else {
         moveDust(r, c, val , 0, 0);
     }
-    
-    MAP[r][c] -= val;
 }
 
 void simulate(){
@@ -75,19 +73,23 @@ void simulate(){
         inNextDusts = vector<bool>( MAX_RC*MAX_RC + MAX_RC , false);
         
         //spread dust and run air purifier
-		int cnt = 0;
-        for(auto dust : prevDusts){    
-            if(cnt++ > 0) break;
+
+        for(auto dust : prevDusts){  
+
+			int to_reduce = 0;
 			for(int i = 0 ; i < 4; i++){
-                if(MAP[dust.r + dr[i]][dust.c + dc[i]] > -1 && dust.val/5 > 0){
+				if(MAP[dust.r + dr[i]][dust.c + dc[i]] > -1 && dust.val/5 > 0){
                     // spreaded dust and purifier move dust
                     spread_moveDust(dust.r + dr[i], dust.c + dc[i], dust.val/5);
-                    dust.val -= dust.val/5;
+                    to_reduce += dust.val/5;
                 }
             }
-            
+			
             // original dust
-            spread_moveDust(dust.r, dust.c, dust.val);
+			MAP[dust.r][dust.c] -= dust.val;
+            dust.val -= to_reduce;
+			spread_moveDust(dust.r, dust.c, dust.val);
+			
         }
         
         
@@ -99,8 +101,8 @@ void simulate(){
         nextDustsPosis.clear();
 #ifdef DEBUG_SIMUL
 cout<<endl;
-for(int i = 1; i <= R; i++){
-	for(int j = 1; j <= C; j++){
+for(int i = 1 ; i <= R; i++){
+	for(int j = 1 ; j <= C; j++){
 		cout<<MAP[i][j]<<" ";
 	}
 	cout<<endl;
