@@ -2,8 +2,8 @@
 #include <vector>
 #include <algorithm>
 
-// #define DEBUG_LCS
-// #define DEBUG_SOLVE
+#define DEBUG_LCS
+#define DEBUG_SOLVE
 #define MAX_N 105
 #define MAX_A 101
 using namespace std;
@@ -82,14 +82,12 @@ vector<int> solve(){
     vector<int> res;
     int x = -1 ; int y = -1;
     for(int digit = MAX_A - 1; digit >= 1 ; digit--){
+        if(num2Node[digit].empty()) continue;
 #ifdef DEBUG_SOLVE
         cout<<"start investigate num2Node["<<digit<<"]"<<endl;
 #endif
-        if(num2Node[digit].empty()) continue;
+
         std::sort(num2Node[digit].begin(), num2Node[digit].end(), compare);
-#ifdef DEBUG_SOLVE
-        cout<<"num2Node["<<digit<<"] survived. x,y ; "<<x<<","<<y<<endl;
-#endif
         // auto iter = upper_bound(num2Node[digit].begin(), num2Node[digit].end(), x);
         auto iter = num2Node[digit].begin();
         while(iter != num2Node[digit].end()){
@@ -120,14 +118,15 @@ int main(){
     LCS(); // build Vector
 #ifdef DEBUG_LCS
 for(int i = 1 ; i < MAX_A; i++){
+    if(num2Node[i].empty()) continue;
     cout<<"printing out num2Node["<<i<<"] : ";
     for(auto node : num2Node[i]){
         cout<<"("<<node.x<<","<<node.y<<") ";
     }
     cout<<endl;
 }
-
 #endif
+
     vector<int> res = solve();
     cout<<res.size()<<endl;
     if(!res.empty()){
