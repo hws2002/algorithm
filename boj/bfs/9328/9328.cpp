@@ -2,14 +2,18 @@
 
 #include <iostream>
 #include <queue>
-#include <iomanip>
+
 
 // #define DEBUG_INPUT
 // #define DEBUG_DFS
 #define MAX_H 105
-#define VISITED 90
-#define OPENEDAFTER 91
+#define VISITED 90 // arbitrary
+#define OPENEDAFTER 91 // this number is arbitrary
+#ifdef DEBUG_INPUT
+#include <iomanip>
+#endif
 using namespace std;
+
 
 
 int h,w;
@@ -27,6 +31,7 @@ public:
         y(_y){}
 };
 
+#ifdef DEBUG_INPUT
 void printMAP(){
 	cout<<endl;
 	for(int i = 0 ; i <= h+3; i++){
@@ -40,6 +45,9 @@ void printMAP(){
 	}
 }
 
+#endif
+
+#ifdef DEBUG_DFS
 void printKeys(){
 	for(int i = 0 ; i <26; i++){
 		if(keys[i]){
@@ -49,6 +57,9 @@ void printKeys(){
 	cout<<endl;
 }
 
+#endif
+
+#ifdef DEBUG_DFS
 void printDoors(vector<Node> d []){
 	for(int i = 0; i < 26; i++){
 		if(d[i].empty()) continue;
@@ -61,6 +72,7 @@ void printDoors(vector<Node> d []){
 		}
 	}
 }
+#endif
 
 void solve(){
     cin>>h>>w;
