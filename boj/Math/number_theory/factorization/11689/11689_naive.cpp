@@ -57,6 +57,8 @@ ll phi(ll n){
 }
 
 int main(){
+	freopen("input.txt","r",stdin);
+	freopen("output1.txt","w",stdout);
     ll n;
     cin>>n;
     cout<<phi(n)<<endl;
