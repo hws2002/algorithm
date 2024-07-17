@@ -1,9 +1,4 @@
+[프로그래밍 대회에서 배우는 알고리즘 문제 해결 전략] (https://book.algospot.com/)
 
-# TODO
-1. Chapter 7
-* karatsuba
-* Merge, QuickSort
-* SquareMatrix
-
-2. Chapter 4
-	maximum subarray sum
+# AOJ
+https://www.algospot.com/judge/problem/list/
