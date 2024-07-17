@@ -11,10 +11,10 @@ double cache[MAX_N][(1<<MAX_N)] = {0};
 
 int N;
 
-double dp(int last, int visit){
+double dp(int last, int visit, double cl){
 	//base
 	if(visit == (1<<N)-1){
-		return 0;
+		return cl;
 	}
 	
 	double & ret = cache[last][visit];
@@ -24,7 +24,7 @@ double dp(int last, int visit){
 	
 	for(int next = 0 ; next < N; next++){
 		if( !(visit & (1<<next)) ){
-			ret = min(ret, dp( next, visit | (1<<next)) +  dist[last][next] );
+			ret = min(ret, dp( next, visit | (1<<next), cl + dist[last][next]) );
 		}
 	}
 	
@@ -46,7 +46,7 @@ void solve(){
 	for(int start= 0 ; start < N; start++){
 		for(int i = 0; i < N; i++)
 			fill(cache[i], cache[i] + (1<<N), -1);
-		ret = min(ret,dp(start,(1<<start)));
+		ret = min(ret,dp(start,(1<<start),0));
 	}
 	printf("%.10f \n",ret);
 }
