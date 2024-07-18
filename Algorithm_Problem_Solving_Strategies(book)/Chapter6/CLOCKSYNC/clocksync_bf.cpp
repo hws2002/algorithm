@@ -10,8 +10,8 @@
 #define NUM_CLOCK 16
 #define MOD 4
 
-#define DEBUG_INPUT
-#define DEBUG_TRYALL
+// #define DEBUG_INPUT
+// #define DEBUG_TRYALL
 using namespace std;
 
 vector<int> clock_status(NUM_CLOCK,0);
