@@ -7,8 +7,6 @@ typedef long long ll;
 
 ll N,K;
 
-ll cache[2'000'000] = {0};
-
 ll EEA(ll a, ll b){// (a,b) = 1 , a > b 이 보장됨
 	ll q = a / b; ll c = a % b;
 	ll a1 = 0; ll b1 = 1;
@@ -27,12 +25,10 @@ ll EEA(ll a, ll b){// (a,b) = 1 , a > b 이 보장됨
 //solve ax + py = 1
 ll getinverse(ll a, ll p){ //
 	if(a == 1) return 1;
-	ll& ret = cache[a];
-	if(ret) return ret;
-	ret = EEA(p,a);
-	while(ret<0) ret += p;
-	ret %= p;
-	return ret;
+	ll x0 = EEA(p,a);
+	while(x0<0) x0 += p;
+	x0 %= p;
+	return x0;
 }
 
 ll nchooser(ll n, ll k){
