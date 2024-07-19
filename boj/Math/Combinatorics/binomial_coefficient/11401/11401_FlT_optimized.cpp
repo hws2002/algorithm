@@ -1,4 +1,4 @@
-// cache쓰지 않은 페르마 소정리 활용한 풀이
+// 페르마 소정리 + non-recursive function
 #include <iostream>
 
 #define MAX_N 4'000'000
@@ -6,15 +6,22 @@
 using namespace std;
 typedef long long ll;
 
-ll powM(ll a, ll p){
-	//base
-	if(p<=0) return 1;
-	if(p==1) return a;
-	if(p % 2) return (a * powM(a,p-1) ) % MOD;
-	ll half = powM(a,p/2);
-	return (half * half) % MOD;
-}
 
+
+ll powM(ll a, ll p){
+	ll res = 1;
+	ll tomul = a;
+	while(p){
+		if(p&1){
+			res *= tomul;
+			res %= MOD;
+		}
+		tomul *= tomul;
+		tomul %= MOD;
+		p>>=1;
+	}
+	return res;
+}
 
 ll getinverse(ll a, ll m){
 	return powM(a,m-2);
