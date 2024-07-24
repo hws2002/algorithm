@@ -7,7 +7,7 @@
 #define MAX_N 1'000
 #define MAX_M 1'000
 using namespace std;
-typedef long double ld;
+
 double X[MAX_N];
 double Y[MAX_N];
 
@@ -83,7 +83,7 @@ int main(){
         if(set.merge(u-1,v-1)) alreadymerged++;
     }
 	
-    cout<<"alreadymerged : "<<alreadymerged<<endl;
+    // cout<<"alreadymerged : "<<alreadymerged<<endl;
 	
     //init first n edges
     for(int i = 0 ; i < N; i++){
