@@ -69,8 +69,8 @@ int main(){
 			total += z;
 		}
 		sort(Edges.begin(), Edges.end());
-		
     	cout<<total - kruskal(M,set)<<endl;	
+		Edges.clear();
 	}
     return 0;
 }
