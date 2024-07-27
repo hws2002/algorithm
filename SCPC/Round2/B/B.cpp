@@ -3,8 +3,8 @@
 #include <algorithm>
 
 #define MAX_N 100'000
-#define DEBUG_INPUT
-#define DEBUG_SEARCH
+// #define DEBUG_INPUT
+// #define DEBUG_SEARCH
 using namespace std;
 typedef long long ll;
 
@@ -95,6 +95,15 @@ cout<<endl;
                     lo = mid;
                 } else { //presum[mid] == X
                     // 바로 살아있는 프로세스들 중, 번호가 가장 큰 프로세스를 출력한다.
+                    // TODO : optimize
+                    for(int i = N; i >= 0; i--){
+                        if( W[i].first >= presumidx2W[mid]){
+                            Answer += i;
+                            break;
+                        }
+                    }
+
+                    //
                     found_exact = true;
                     break;
                 }
@@ -102,10 +111,10 @@ cout<<endl;
 #ifdef DEBUG_SEARCH
 printf("mid, height : %d %lld \n", mid, presumidx2W[mid]);
 #endif
+            if(!found_exact){ // 이제 mid를 잘 활용해야 함.
                 ll height = presumidx2W[mid];          
-                vector< pair<ll,int> >::iterator it;
-                if(found_exact) it = upper_bound( W.begin(), W.end(), make_pair(height, -1));
-                else it = upper_bound( W.begin(), W.end(), make_pair(height+1, -1));
+
+                auto it = upper_bound( W.begin(), W.end(), make_pair(height+1, -1));
                 vector<pair<ll,int>> W2(it, W.end());
 #ifdef DEBUG_SEARCH
 printf("distance(it,W.begin() : %d) \n", it - W.begin());
@@ -123,14 +132,16 @@ cout<<endl;
 printf("W2[%lld] : %d \n", idx, W2[idx].second+1);
 #endif
                 Answer += W2[idx].second+1;
+            }
         }
 		/////////////////////////////////////////////////////////////////////////////////////////////
 		
 		// Print the answer to standard output(screen).
 		cout << "Case #" << test_case+1 << endl;
 		cout << Answer << endl;
-        // presumW.clear();
+        presumW.clear();
         W.clear();
+        presumidx2W.clear();
 	}
 
 	return 0;//Your program should return 0 on normal termination.
