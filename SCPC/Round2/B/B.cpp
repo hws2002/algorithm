@@ -5,6 +5,7 @@
 #define MAX_N 100'000
 // #define DEBUG_INPUT
 // #define DEBUG_SEARCH
+#define endl '\n'
 using namespace std;
 typedef long long ll;
 
@@ -29,6 +30,9 @@ bool cmp(ll h, pair<ll, int> const & p){
 
 int main(int argc, char** argv)
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
 	int T, test_case;
 
 	// freopen("input.txt", "r", stdin);
@@ -94,16 +98,6 @@ cout<<endl;
                     if(lo == mid) break;
                     lo = mid;
                 } else { //presum[mid] == X
-                    // 바로 살아있는 프로세스들 중, 번호가 가장 큰 프로세스를 출력한다.
-                    // TODO : optimize
-                    for(int i = N; i >= 0; i--){
-                        if( W[i].first >= presumidx2W[mid]){
-                            Answer += i;
-                            break;
-                        }
-                    }
-
-                    //
                     found_exact = true;
                     break;
                 }
@@ -113,8 +107,10 @@ printf("mid, height : %d %lld \n", mid, presumidx2W[mid]);
 #endif
             if(!found_exact){ // 이제 mid를 잘 활용해야 함.
                 ll height = presumidx2W[mid];          
-
-                auto it = upper_bound( W.begin(), W.end(), make_pair(height+1, -1));
+                vector<pair<ll,int> >::iterator it;
+                if(found_exact)
+                    it = upper_bound( W.begin(), W.end(), make_pair(height, -1));
+                else it = upper_bound( W.begin(), W.end(), make_pair(height+1, -1));
                 vector<pair<ll,int>> W2(it, W.end());
 #ifdef DEBUG_SEARCH
 printf("distance(it,W.begin() : %d) \n", it - W.begin());
