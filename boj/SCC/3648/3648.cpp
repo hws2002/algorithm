@@ -2,7 +2,7 @@
 #include <vector>
 #include <stack>
 
-#define MAX_N 1'005
+#define MAX_N 1'000
 #define FOR(i,s,e) for(int i = s; i < e; i++)
 #define endl '\n'
 // #define DEBUG_TJ
@@ -132,7 +132,7 @@ bool assignValue(const int sccId, const bool assignTrue){
             int vIdx_ = isvnot ? vIdx -1 : vIdx + 1;
             if( svalues[v2scc[vIdx_]] == 1) return false;
             if( svalues[v2scc[vIdx_]] != -1) continue;
-            assignValue(v2scc[vIdx_], 0);
+            if(!assignValue(v2scc[vIdx_], 0)) return false;
         }
         
     } else {
@@ -159,11 +159,11 @@ bool assignValue(const int sccId, const bool assignTrue){
             if(isvnot){
                 if( svalues[v2scc[vIdx-1]] == 0) return false;
                 if( svalues[v2scc[vIdx-1]] != -1) continue;
-                assignValue(v2scc[vIdx-1], 1);
+                if(!assignValue(v2scc[vIdx-1], 1)) return false;
             } else {
                 if( svalues[v2scc[vIdx+1]] == 0) return false;
                 if( svalues[v2scc[vIdx+1]] != -1) continue;
-                assignValue(v2scc[vIdx+1], 1);
+                if(!assignValue(v2scc[vIdx+1], 1)) return false;
             }
         }
     }
