@@ -10,13 +10,13 @@ using namespace std;
 
 int n,m;
 vector<int> adj[MAX_N<<1];
-// vector<int> sadj[MAX_N<<1];
-// vector<int> rsadj[MAX_N<<1];
+vector<int> sadj[MAX_N<<1];
+vector<int> rsadj[MAX_N<<1];
 
 vector<int> discovered(MAX_N<<1, -1);
 vector<int> v2scc(MAX_N<<1,-1); // v2scc[i] : i번째 vertex가 속해있는 scc
 vector<int> scc2v[MAX_N<<1]; // scc2v[i] : i번째 scc에 속해있는 vertex들
-// vector<int> p_scc[MAX_N<<1]; // p_scc[i] : i번째 scc의 parent vertex들
+vector<int> p_scc[MAX_N<<1]; // p_scc[i] : i번째 scc의 parent vertex들
 
 vector<int> values(MAX_N,-1);
 vector<int> svalues(MAX_N<<1,-1);
@@ -37,7 +37,7 @@ int tarjan(const int here, const int parent){
                 lowest_node = min(lowest_node, discovered[next]);
                 //순방향 간선인 경우 갱신이 일어나지 않지만 위 연산을 해주어도 상관이 없다.
             } else { //이미 scc에 묶인 경우, 해당 scc의 parent scc는 v2scc[here]이 되어야 한다.    
-                // p_scc[v2scc[next]].push_back(here);
+                p_scc[v2scc[next]].push_back(here);
             }
         }
     }
@@ -50,9 +50,9 @@ int tarjan(const int here, const int parent){
             st.pop();
             if( t == here) break;
         }
-        // if(parent != -1){
-            // p_scc[sCnt].push_back(parent);
-        // }
+        if(parent != -1){
+            p_scc[sCnt].push_back(parent);
+        }
         sCnt++;
     }
     
@@ -60,6 +60,7 @@ int tarjan(const int here, const int parent){
 }
 
 void tarjanAll(){
+    sCnt = 0; vCnt = 0;
     // scc 분리
     FOR(i, 0, n<<1){
         if(discovered[i] == -1) tarjan(i,-1);
@@ -73,28 +74,27 @@ for(int i = 0; i < sCnt; i++){
     cout<<endl;
 }
 #endif
-
+    
     // scc간에 adj 만들기
-//     for(int sccid = 0; sccid < sCnt; sccid++){
-//         vector<bool> alreadyadded(sCnt+5,false);
-//         for(auto pv : p_scc[sccid]){
-//             int pscc = v2scc[pv];
-//             if( !alreadyadded[pscc]){
-//                 sadj[pscc].push_back(sccid);
-//                 rsadj[sccid].push_back(pscc); // rsadj[0] = {1,2,3} 이라면 1->0, 2->0, 3->0 인 간선들이 존재하는셈
-//                 alreadyadded[pscc] = true;
-//             }
-//         }
-//     }
-// #ifdef DEBUG_TJ
-// for(int sccid = 0; sccid < sCnt; sccid++){
-//     printf("sadj[%d] : ", sccid);
-//     for(auto cs : sadj[sccid]){
-//         cout<<cs<<" ";
-//     }
-//     cout<<endl;
-// }
-// #endif
+    for(int sccid = 0; sccid < sCnt; sccid++){
+        vector<bool> alreadyadded(sCnt,false);
+        for(auto pv : p_scc[sccid]){
+            if( !alreadyadded[v2scc[pv]]){
+                sadj[v2scc[pv]].push_back(sccid);
+                rsadj[sccid].push_back(v2scc[pv]); // rsadj[0] = {1,2,3} 이라면 1->0, 2->0, 3->0 인 간선들이 존재하는셈
+                alreadyadded[v2scc[pv]] = true;
+            }
+        }
+    }    
+#ifdef DEBUG_TJ
+for(int sccid = 0; sccid < sCnt; sccid++){
+    printf("sadj[%d] : ", sccid);
+    for(auto cs : sadj[sccid]){
+        cout<<cs<<" ";
+    }
+    cout<<endl;
+}
+#endif
 }
 
 
@@ -106,7 +106,7 @@ bool assignValue(const int sccId, const bool assignTrue){
     if(assignTrue){ // scc2v[sccId] 에 속한 변수들이 모두 true가 되도록 한다.
         for(auto vIdx : scc2v[sccId]){
             valueIdx = vIdx>>1;
-            isvnot = ( vIdx % 2 == 1);
+            isvnot = ( (vIdx % 2) == 1);
             if(isvnot) {
                 //valueIdx번 변수는 false가 되어야 하는데 이미 true가 주입되었다면 conflict
                 if( values[valueIdx] == 1) return false;
@@ -119,27 +119,31 @@ bool assignValue(const int sccId, const bool assignTrue){
         }
         
         // sccId번 scc의 child scc들은 모두 true가 되어야 하고
-        // for(auto cscc : sadj[sccId]){
-        //     if( svalues[cscc] == 0) return false;
-        //     // if( svalues[cscc] == 1) continue;
-        //     // assignValue(cscc, 1);
-        // }
+        for(auto cscc : sadj[sccId]){
+            if( svalues[cscc] == 0) return false;
+            if( svalues[cscc] == 1) continue;
+            if( !assignValue(cscc, 1)) return false;
+        }
         
         // 현 scc에 속해있는 친구들
-        
         for(auto vIdx : scc2v[sccId]){
-            isvnot = (vIdx % 2 == 1);
-            int vIdx_ = isvnot ? vIdx -1 : vIdx + 1;
-            if( svalues[v2scc[vIdx_]] == 1) return false;
-            if( svalues[v2scc[vIdx_]] != -1) continue;
-            if(!assignValue(v2scc[vIdx_], 0)) return false;
+            bool isvnot = (vIdx % 2 == 1);
+            if(isvnot){
+                if( svalues[v2scc[vIdx-1]] == 1) return false;
+                if( svalues[v2scc[vIdx-1]] != -1) continue;
+                if( !assignValue(v2scc[vIdx-1], 0)) return false;
+            } else {
+                if( svalues[v2scc[vIdx+1]] == 1) return false;
+                if( svalues[v2scc[vIdx+1]] != -1) continue;
+                if( !assignValue(v2scc[vIdx+1], 0)) return false;
+            }
         }
         
     } else {
         for(auto vIdx : scc2v[sccId]){
             valueIdx = vIdx>>1;
-            isvnot = ( vIdx % 2 == 1);
-            if(isvnot){
+            bool isvnot =  (vIdx % 2 == 1);
+            if (isvnot){
                 if( values[valueIdx] == 0) return false;
                 values[valueIdx] = 1;
             } else {
@@ -148,22 +152,22 @@ bool assignValue(const int sccId, const bool assignTrue){
             }    
         }
         
-        // for(auto pscc : rsadj[sccId]){
-        //     if( svalues[pscc] == 1) return false;
-        //     // if( svalues[pscc] == 0) continue;
-        //     // assignValue(pscc,0);
-        // }
+        for(auto cscc : rsadj[sccId]){
+            if( svalues[cscc] == 1) return false;
+            if( svalues[cscc] == 0) continue;
+            if( !assignValue(cscc,0)) return false;
+        }
         
         for(auto vIdx : scc2v[sccId]){
             isvnot = (vIdx % 2 == 1);
             if(isvnot){
                 if( svalues[v2scc[vIdx-1]] == 0) return false;
                 if( svalues[v2scc[vIdx-1]] != -1) continue;
-                if(!assignValue(v2scc[vIdx-1], 1)) return false;
+                if( !assignValue(v2scc[vIdx-1], 1)) return false;
             } else {
                 if( svalues[v2scc[vIdx+1]] == 0) return false;
                 if( svalues[v2scc[vIdx+1]] != -1) continue;
-                if(!assignValue(v2scc[vIdx+1], 1)) return false;
+                if( !assignValue(v2scc[vIdx+1], 1)) return false;
             }
         }
     }
@@ -171,6 +175,9 @@ bool assignValue(const int sccId, const bool assignTrue){
 }
 
 int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
     int a,b;
     bool isanot, isbnot;
     while(cin>>n>>m){
@@ -221,24 +228,16 @@ int main(){
         //reset
         for(int i = 0 ; i < n<<1; i++){
             adj[i].clear();
-            // sadj[i].clear();
-            // rsadj[i].clear();
+            sadj[i].clear();
+            rsadj[i].clear();
             scc2v[i].clear();
-            // p_scc[i].clear();
+            p_scc[i].clear();
         }
-        
-        for(int i = 0; i < n; i++){
-            discovered[i] = -1;
-            values[i] = -1;
-            svalues[i] = -1;
-            v2scc[i] = -1;
-        }
-        // discovered.clear(); discovered.resize(MAX_N<<1, -1);
-        // v2scc.clear(); v2scc.resize(MAX_N<<1, -1);
-        // values.clear(); values.resize(MAX_N, -1);
-        // svalues.clear(); svalues.resize(MAX_N<<1, -1);
-        while(!st.empty()) st.pop();
-    }
     
+        discovered.clear(); discovered.resize(MAX_N<<1, -1);
+        v2scc.clear(); v2scc.resize(MAX_N<<1, -1);
+        values.clear(); values.resize(MAX_N, -1);
+        svalues.clear(); svalues.resize(MAX_N<<1, -1);
+    }
     return 0;
 }
