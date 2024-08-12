@@ -1,28 +1,25 @@
-// sparse table
+// sparse table + rmq
 #include <iostream>
 #include <vector>
 #include <limits.h>
 #include <cmath>
 
-#define MAX_N 40'000
-#define MAX_LOG2N 16 // [log2(40000)
+#define MAX_N 100'000
+#define MAX_LOG2N 17 // [log2(100,000)] + 1
 #define endl '\n'
 #define INF 1'000'000'000
-// #define DEBUG_TRAV
-// #define DEBUG_RMQ
 // #define DEBUG_STABLE
 // #define DEBUG_QUERY
-
 using namespace std;
-
 int N;
 int K;
 vector<int> trav; // 최대 2N
 vector<int> pre2node(MAX_N);
 
 vector<int> pow2d(MAX_LOG2N);
-int stable[MAX_LOG2N][MAX_N] = {0}; // stable[k][i] : i번째 노드에서 2^k번째 조상까지의 거리. 만약 i의 2^k번째 조상이 없다면, 루트까지의 거리를 반환한다.
 int parent[MAX_LOG2N][MAX_N] = {0}; // parent[k][i] : i번째 노드의 2^k번째 조상. 만약 i의 2^k번째 조상이 없다면, 루트를 가리킨다
+int stablem[MAX_LOG2N][MAX_N] = {0}; // stable[k][i] : i번째 노드에서 2^k번째 조상까지의 거리들중 최소값. 만약 i의 2^k번째 조상이 없다면, 루트까지의 거리 중 최소값을 반환한다.
+int stableM[MAX_LOG2N][MAX_N] = {0}; // stable[k][i] : i번째 노드에서 2^k번째 조상까지의 거리들중 최소값. 만약 i의 2^k번째 조상이 없다면, 루트까지의 거리 중 최대값을 반환한다.
 
 // 아래는 모두 nodeIdx 기준
 vector<pair<int,int>> children[MAX_N];
@@ -44,7 +41,8 @@ void travPre(const int here, const int d, const int p){
         int cost = child.second;
         if(next == p) continue;
         parent[0][next] = here;
-        stable[0][next] = cost;
+        stablem[0][next] = cost;
+        stableM[0][next] = cost;
         travPre(next, d+1, here);
         trav.push_back(node2pre[here]);
     }
@@ -84,37 +82,20 @@ struct RMQ{ // range min query
 // nodeIdx 기준 u와 v의 LCA(nodeIdx)를 반환한다
 int findLCA(int u, int v, RMQ & rmq){
     u = flocintrav[u]; v = flocintrav[v];
-#ifdef DEBUG_QUERY
-printf("u : %d, v : %d, ", u, v);
-#endif
     if(u > v) swap(u,v);
     int lca = rmq.query(u,v);
-#ifdef DEBUG_QUERY
-printf("lca : %d \n", pre2node[lca]);
-#endif
     return pre2node[lca];
 }
 
-// nodeIdx 기준 s의 dist번째 조상까지의 거리를 반환한다
-int fn(int s, int dist){
+// nodeIdx 기준 s의 dist번째 조상까지의 거리들 중 최소값과 최대값을 반환한다.
+pair<int,int> fn(int s, int dist){
+    if(dist <= 0) return {INF,-1};
+	int k = log2(dist);
 #ifdef DEBUG_QUERY
-	printf("fn(%d, %d) \n", s, dist);
+printf("fn(%d, %d, %d) \n", s, dist, k);
 #endif
-    if(dist <= 0) return 0;
-    int ret = 0;
-    for(int d = MAX_LOG2N-1; d >= 0; d--){
-        if(!dist) break;
-        if(dist / pow2d[d]){
-            ret += stable[d][s];
-#ifdef DEBUG_QUERY
-printf("dist, pow2d[%d], ret : %d, %d, %d \n", d, dist, pow2d[d], ret);
-#endif
-            s = parent[d][s];
-            dist -= pow2d[d];
-        }
-    }
-    
-    return ret;
+	auto pii = fn( parent[k][s], dist - pow2d[k]);
+	return { min(stablem[k][s], pii.first), max(stableM[k][s], pii.second) };
 }
 
 int main(){
@@ -138,62 +119,51 @@ int main(){
     // travpre
     // root 아무거나 잡고 시작
     travPre(0,0,-1);
-#ifdef DEBUG_TRAV
-for(int i = 0; i < N; i++){
-    cout<<i+1<<" ";
-}
-cout<<endl;
-cout<<"node2pre : "<<endl;
-for(int i = 0; i < N; i++){
-    cout<<node2pre[i]<<" ";
-}    
-cout<<endl;
-
-cout<<"trav : "<<endl;
-for(auto e : trav){
-    cout<<e<<" ";
-}
-cout<<endl;
-cout<<"depth : "<<endl;
-for(int i = 0; i < N; i++){
-    cout<<depth[i]<<" ";
-}
-cout<<endl;
-
-#endif
     //create segtree
     RMQ rmq(trav);
-    
+    // cout<<"hello"<<endl;
     // create parent table & sparse table 
-    for(int k = 1; k < MAX_LOG2N; k++){
+    stablem[0][0] = INF; 
+	stableM[0][0] = -1;
+	for(int k = 1; k < MAX_LOG2N; k++){
         for(int nodeIdx = 0; nodeIdx < N; nodeIdx++){
             // create parent table first
             parent[k][nodeIdx] = parent[k-1][ parent[k-1][nodeIdx] ];
-            stable[k][nodeIdx] = stable[k-1][nodeIdx] + stable[k-1][parent[k-1][nodeIdx]];
+			stablem[k][nodeIdx] = min(stablem[k-1][nodeIdx], stablem[k-1][parent[k-1][nodeIdx]]);
+			stableM[k][nodeIdx] = max(stableM[k-1][nodeIdx], stableM[k-1][parent[k-1][nodeIdx]]);
         }
     }
 #ifdef DEBUG_STABLE
-for(int i = 0; i < N; i++){
-    cout<<i+1<<" ";
+cout<<"stablem : "<<endl;
+	
+for(int i = 0 ; i < N; i++){
+	cout<<i+1<<" ";
 }
 cout<<endl;
-for(int k = 0; k < 4; k++){
-    cout<<"parent["<<k<<"]  : ";
-    for(int i = 0; i < N; i++){
-        cout<<parent[k][i]+1<<" ";
-    }
-    cout<<endl;
+	
+for(int k = 0; k < 3; k++){
+	printf("stablem[%d] : ",k);
+	for(int i = 0; i < N; i++){
+		cout<<stablem[k][i]<<" ";
+	}
+	cout<<endl;
 }
 
-for(int k = 0; k < 4; k++){
-    cout<<"stable["<<k<<"]  : ";
-    for(int i = 0 ; i < N; i++){
-        cout<<stable[k][i]<<" ";
-    }
-    cout<<endl;
+cout<<"stableM : "<<endl;
+for(int i = 0 ; i < N; i++){
+	cout<<i+1<<" ";
+}
+cout<<endl;
+	
+for(int k = 0; k < 3; k++){
+	printf("stableM[%d] : ",k);
+	for(int i = 0; i < N; i++){
+		cout<<stableM[k][i]<<" ";
+	}
+	cout<<endl;
+
 }
 #endif
-
     //query
     cin>>K;
     int D,E,lca;
@@ -204,9 +174,12 @@ for(int k = 0; k < 4; k++){
         lca = findLCA(D,E, rmq); //lca (nodeIdx)
         d1 = depth[D] - depth[lca]; d2 = depth[E] - depth[lca];
 #ifdef DEBUG_QUERY
-printf("d1 : %d, d2 : %d \n", d1,d2);
+printf("D, E, lca, d1, d2 : %d, %d, %d, %d, %d \n", D, E, lca, d1, d2);
 #endif
-        cout<<fn(D,d1) + fn(E,d2)<<endl;
+		auto fnd1 = fn(D,d1);
+		auto fnd2 = fn(E,d2);
+		cout<<min(fnd1.first , fnd2.first)<<" ";
+		cout<<max(fnd1.second, fnd2.second)<<endl;
     }
     return 0;
 }
