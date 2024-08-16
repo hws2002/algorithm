@@ -2,81 +2,60 @@
 #include <vector>
 
 #define MAX_N 1'000
+#define MAX_M 1'000
 using namespace std;
 
 int N,M;
-const int source = 0;
-int sink;
 
-vector<int> adj[MAX_N];
-// source - worker - work - sink
-// 0 - 1~N - N+1~N+M - N+M+1
+bool adj[MAX_N][MAX_N] = {0}; // adj[i][j] : i번째 직원이 j번째 일을 할 수 있는지
+vector<int> workerMatch(MAX_N,-1); // workerMatch[i] : i번째 직원과 연결되어 있는 일의 index 
+vector<int> workMatch(MAX_N,-1); // workMatch[i] : i번째 일과 연결되어 있는 직원의 index
+vector<bool> visited;
 
-struct Edge{
-public:
-    int target, capacity, flow;
-    Edge * inv;
-    Edge(int t, c, f, inv_) : target(t), capacity(c), flow(f), inv(inv_){};
-    int residual(){return capacity - flow};
-    void push(int amt){
-        flow += amt;
-        inv->flow -= amt;
-        return ;
+bool dfs(int worker){
+    if(visited[worker]) return false;
+    visited[worker] = true;
+
+    for(int work = 0; work < M ; work++){
+        if(adj[worker][work]){
+            if( workMatch[work] == -1 || dfs(workMatch[work])){
+                workerMatch[worker] = work;
+                workMatch[work] = worker;
+                return true;
+            }
+        }
     }
-};
-
-void addEdge(int u, int v, int c){
-    Edge * uv = Edge(v,c,0,nullptr);
-    Edge * vu = Edge(u,0,0,nullptr);
-    
-    uv->inv = vu;
-    vu->inv = uv;
-    
-    adj[u].push_back(uv);
-    adj[v].push_back(vu);
+    return false;
 }
 
 int res = 0;
-void maxFlow(){
-    int amt;
-    int here;
-    while(true){
-        
-        
-        //find amt
-        // amt always 1
-        amt = 1;
-        
-        //push
-        
+
+void bipartiteMatch(){
+    //reset 
+    for(int i = 0; i < N; i++){
+        for(int j = 0;  j < 2; j++){
+            visited = vector<bool> (N, false);    
+            if(dfs(i)) res++;
+        }
     }
 }
 
 int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
     cin>>N>>M;
-    int num_work, work;
-    sink = N+M+1;
-    // source to worker
-    for(int worker = 1; worker <= N; worker++){
-        addEdge(source,worker,2);
-    }
-    
-    // worker to work
-    for(int worker = 1 ; worker <= N; worker++){
+    int work, num_work;
+    for(int i = 0; i < N; i++){
         cin>>num_work;
         while(num_work--){
             cin>>work;
-            addEdge(worker, N+work,1);
+            adj[i][--work] = true;
         }
     }
     
-    // work to sink
-    for(int work = 1; work <= M; work++){
-        addEdge(N+work, sink, 1);
-    }
-    
-    //maxflow
-    maxFlow();
+    //bipartite match
+    bipartiteMatch();
     
     cout<<res<<endl;
     return 0;
