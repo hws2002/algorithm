@@ -1,5 +1,4 @@
-//MCMF, dinic
-
+//edmonds karp
 #include <iostream>
 #include <vector>
 #include <queue>

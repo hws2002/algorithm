@@ -1,4 +1,4 @@
-//MCMF, dinic
+//MCMF
 
 #include <iostream>
 #include <vector>
