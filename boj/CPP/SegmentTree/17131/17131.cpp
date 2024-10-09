@@ -61,48 +61,80 @@ public:
     int x,y;
 	int oidx;
 	int num;
-    Star(int x, int y, int oi) : x(x), y(-y), oidx(oi), num(1){};
+    Star(int x, int y, int oi) : x(x), y(y), oidx(oi), num(1){};
     
     bool operator==(const Star & rhs) const{
         return x == rhs.x && y == rhs.y;
     };
 };
 
+// x순, y순
 bool comp1(const Star & a, const Star & b){
     if( a.x == b.x ) return a.y < b.y;
     return a.x < b.x;
 }
 
+// x순, y역
 bool comp2(const Star & a, const Star & b){
-    if( a.y == b.y ) return a.x < b.x;
-    return a.y < b.y;
+    if( a.x == b.x) return a.y > b.y;
+    return  a.x < b.x;
 }
 
+// y순, x역
 bool comp3(const Star & a, const Star & b){
     if( a.y == b.y ) return a.x > b.x;
     return a.y < b.y;
 }
 
+// y순, x순
 bool comp4(const Star & a, const Star & b){
-    if( a.x == b.x) return a.y > b.y;
-    return  a.x < b.x;
+    if( a.y == b.y ) return a.x < b.x;
+    return a.y < b.y;
 }
+
+
+
 
 vector<Star> stars;
 vector<ll> lft(MAX_N,0);
 vector<ll> rgt(MAX_N,0);
 
+int getPosi_r(vector<Star>::iterator b, vector<Star>::iterator e, int f, vector<Star> & v){
+	return lower_bound(b,e,f,[](const Star & s, int x){
+			return s.x < x;
+	}) - v.begin();
+};
+
+
+int getPosi_l(vector<Star>::iterator b, vector<Star>::iterator e, int f, vector<Star> & v){
+	return lower_bound(b,e,f,[](const Star & s, int x){
+			return -s.x < -x;
+	}) - v.begin();
+};
+
+vector<Star>::iterator getStart(vector<Star>::iterator b, vector<Star>::iterator e, const Star & f){
+	return lower_bound(b,e, f, [](const Star & s, const Star & st){
+		return s.y < st.y;
+	});
+}
+
+vector<Star>::iterator getEnd(vector<Star>::iterator b, vector<Star>::iterator e, const Star & f){
+	return upper_bound(b, e, f, [](const Star & s, const Star & st){
+		return s.y < st.y;
+	});
+}
+
 int main(){
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cin>>N;
-    int x,y;    
+    int x,y;
     for(int i = 0;  i < N; i++){
         cin>>x>>y;
-        stars.push_back(Star(x,y,i));
+        stars.push_back(Star(x,-y,i)); // y값은 거꾸로 담는다
     }
 
-    // x 기준으로 정렬, x가 같은 경우 y 역순 정렬
+    //x순, y순
     sort(stars.begin(), stars.end(), comp1);
     
     //deduplicate
@@ -131,12 +163,13 @@ int main(){
 	vector<Star> stars_y_x = stars_x_y;
     vector<Star> stars_y_inv_x = stars_x_y;
 	
-    // x 기준으로 정렬, x가 같은 경우 y 순방향 정렬
-    sort(stars_x_inv_y.begin(), stars_x_inv_y.end(), comp4);
-    // y 역순으로 정렬, y가 같은 경우 x 순방향 정렬
-    sort(stars_y_x.begin(), stars_y_x.end(), comp2);
-    // y 역순으로 정렬, y가 같은 경우 x 역순 정렬
+	// x순, y역
+    sort(stars_x_inv_y.begin(), stars_x_inv_y.end(), comp2);
+	// y순, x역
     sort(stars_y_inv_x.begin(), stars_y_inv_x.end(), comp3);
+    // y순, x순
+    sort(stars_y_x.begin(), stars_y_x.end(), comp4);
+
 	
 	//create RSQ
 	RSQ<ll> rsq_r(n_size,0);
@@ -151,32 +184,16 @@ int main(){
     //fill right
     for(int i = 0 ; i < n_size; i++){
         auto star_r = stars_x_y[i]; auto star_l = stars_x_inv_y[n_size-1-i];
-		auto start_r= lower_bound(stars_y_x.begin(), stars_y_x.end(), star_r.y, [](const Star & s, int y){
-                return s.y < y;
-            });
-		auto start_l = lower_bound(stars_y_inv_x.begin(), stars_y_inv_x.end(), star_l.y, [](const Star & s, int y){
-				return s.y < y;
-			});
-    	auto end_r = upper_bound(stars_y_x.begin(), stars_y_x.end(), star_r, [](const Star & s, const Star & st){
-    			return s.y < st.y; // Compare based on y
-    		});
-		auto end_l = upper_bound(stars_y_inv_x.begin(), stars_y_inv_x.end(), star_l, [](const Star & s, const Star & st){
-				return s.y < st.y;
-			});
 		
-        int posi_r = lower_bound(
-			start_r, end_r,
-			star_r.x, 
-			[]( const Star & s, int x){
-				return s.x < x;
-			}) - stars_y_x.begin();
+		auto start_r = getStart(stars_y_x.begin(), stars_y_x.end(), star_r);
+		auto start_l = getStart(stars_y_inv_x.begin(), stars_y_inv_x.end(), star_l);
+		
+		auto end_r = getEnd(stars_y_x.begin(), stars_y_x.end(), star_r);
+		auto end_l = getEnd(stars_y_inv_x.begin(), stars_y_inv_x.end(), star_l);	
+		
+		int posi_r = getPosi_r(start_r, end_r, star_r.x, stars_y_x);
+		int posi_l = getPosi_l(start_l, end_l, star_l.x, stars_y_inv_x);
 
-        int posi_l = lower_bound(
-			start_l, end_l,
-			star_l.x,
-			[](const Star & s, int x){
-				return -s.x < -x;	
-			}) - stars_y_inv_x.begin();
 		rgt[star_r.oidx] = rsq_r.query(0, posi_r);
 		lft[star_l.oidx] = rsq_l.query(0, posi_l);
         
