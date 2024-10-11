@@ -70,12 +70,12 @@ public :
     ll query(const int l, const int r, const int nodeNum, const int nodeLeft, const int nodeRight){
         //push
         propagate(nodeNum, nodeLeft, nodeRight);
-        
+
         //out of range
         if( r < nodeLeft || nodeRight < l) return 0;
 
         //inside range
-        if( l <= nodeLeft && nodeRight <= r) { 
+        if( l <= nodeLeft && nodeRight <= r) {
             return rangeSum[nodeNum];
         }
 
@@ -88,7 +88,6 @@ public :
         return query(l,r,1,0,n-1);
     }
 };
-
 
 int main(){
     ios_base::sync_with_stdio(false);
