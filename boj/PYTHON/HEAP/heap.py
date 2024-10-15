@@ -6,7 +6,7 @@ class BinaryHeap(object):
         return len(self.items) - 1
     
     # 삽입
-    def _percolate_up():
+    def _percolate_up(self):
         i = len(self)
         parent = i // 2
         while parent > 0:
