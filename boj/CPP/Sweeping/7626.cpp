@@ -2,138 +2,137 @@
 #include <vector>
 #include <algorithm>
 
-
-#define MAX_COOR 1'000'000'000
+#define MAX_N 200'002
+#define endl '\n'
 using namespace std;
 typedef long long ll;
 
-template <typename T>
-struct Rectangle{
-    // x1 < x2, y1 < y2
-    T x1, y1, x2, y2;
-    Rectangle(T x1, T y1, T x2, T y2) : x1(x1), y1(y1), x2(x2), y2(y2){};
+struct Rec{
+public:
+    int x1,x2,y1,y2;
+    Rec(int x1, int x2, int y1, int y2) : x1(x1), x2(x2), y1(y1), y2(y2){};
 };
 
-template <typename T>
+int N;
+vector<Rec> rects;
+
+struct Event{
+public:
+    int x;
+    int delta;
+    int idx;
+    Event(int x, int delta, int idx) : x(x), delta(delta), idx(idx){};
+};
+
+vector<int> ys;
+
 struct SegTree{
-	int n;
-	vector<ll> rangeCover;
-	vector<int> count;
-	vector<int> lazy;
-	
-	SegTree(int n) : n(n){
-		rangeCover.resize(4*n,0);
-		rangeSum.resize(4*n,0);
-		lazy.resize(4*n,0);
-	}
-	
-	void propagate(int nn, int nl, int nr){
-		if( lazy[nn] ){
-			
-			if( nl < nr){
-				lazy[nn<<1] += lazy[nn];
-				lazy[nn<<1|1] += lazy[nn];
-			}
-			lazy[nn] = 0;
-		}
-	}
-	
-	int update(int l, int r, int toadd, int nn, int nl, int nr){
-		propagate(nn,nl,nr);
-		if( r < nl || nr < l) return rangeCover[nn];
-		
-	}
-	
-	//update
-	void update(int l, int r, int toadd){
-		update(l,r,toadd,1,0,n-1);
-	}
-	
-	//query
-	ll query(int l, int r, int nn, int nl, int nr){
-		// push
-		propagate(nn,nl,nr);
-		
-		if( r < nl || nr < l) return 0;
-		
-		if( l <= nl && nr <= r) {
-			return rangeCover[nn];
-		}
-		
-		int mid = (nl + nr) >> 1;
-		return query(l,r, nn<<1, nl, mid) + query(l,r, nn<<1 | 1, mid+1, nr);
-	}
-
-	//query
-	ll query(int l, int r){ // [l,r]
-		return query(l, r, 1, 0, n-1);
-	}
-	
-};
-
-//직사각형들의 면적을 계산한다
-template <typename T>
-T unionArea(const vector< Rectangle<T>> & rects){
-    if(rects.empty()) return 0;
+public:
+    int n;
+    vector<int> cnt;
+    vector<int> rc; // rangecover in real coordiniate (coordinate before compression)
     
-    // 이벤트 정보 : (x 좌표, 왼쪽인가 오른쪽인가, 사각형의 번호)
-    typedef pair<T, pair<int,int> > Event;
-    vector<Event> events;
-    vector<T> ys;
-    // 각 사각형을 순회하면서 y좌표의 모음과 이벤트의 집합을 찾는다
-    for(int i = 0; i < rects.size(); i++){
-        ys.push_back(rects[i].y1);
-        ys.push_back(rects[i].y2);
-        events.push_back( Event(rects[i].x1, {1,i}) );
-        events.push_back( Event(rects[i].x2, {-1,i}) );
+    SegTree(int n) : n(n){
+        cnt.resize(4*n,0);
+        rc.resize(4*n,0);
+    };
+    
+    
+    void add(int l ,int r, int val, int nn, int nl, int nr){
+        // printf("l,r, nn, nl, nr : %d, %d, %d, %d , %d \n",l,r, nn, nl, nr);
+        // out of range
+        if( r <= nl || nr < l) return ;
+
+        if( l <= nl && nr < r) {
+            // inside of range
+            cnt[nn] += val;
+        } else {
+            // the third case
+            int mid = (nl + nr) >> 1;
+            add(l,r,val, nn<<1, nl, mid); add(l,r,val, nn<<1|1, mid+1, nr);
+        }
+
+        if( cnt[nn] ) rc[nn] = ys[nr+1] - ys[nl];
+        else {
+            if(nr<=nl) rc[nn] = 0;
+            else rc[nn] = rc[nn<<1] + rc[nn<<1|1];
+        }
     }
     
-    // y 좌표의 집합을 정렬하고 중복을 제거
+    //add - interface
+    void add(int l, int r, int val){ //add val to [l,r)
+        add(l, r, val, 1, 0, n-1);
+    }
+
+    //query
+    int query(){
+        return rc[1];
+    }
+};
+
+void compressCoordinate(){
+    // compress coordinates of rects
+    // and store result in ys
+    for(auto & rec : rects){
+        ys.push_back(rec.y1);
+        ys.push_back(rec.y2);
+    }
+    
     sort(ys.begin(), ys.end());
-    ys.erase(unique(ys.begin(), ys.end()), ys.end());    
+    ys.erase( unique(ys.begin(), ys.end()), ys.end() );
+    // for(auto y : ys){
+    //     cout<<y<<" ";
+    // }
+    // cout<<endl;
     
-    // 이벤트 목록을 정렬
-    sort(events.begin(), events.end());    
-    T ret = 0;
-    
-    //count[i] = ys[i] ~ ys[i+1] 구간에 겹쳐진 사각형의 수
-    vector<int> count(ys.size()-1, 0);
-    for(int i = 0 ; i < events.size(); i++){
-        T x = events[i].first;
-        int delta = events[i].second.first;
-        int rectangle = events[i].second.second;
-        //count[]를 갱신
-        T y1 = rects[rectangle].y1; T y2 = rects[rectangle].y2;
-        for(int j = 0; j < ys.size(); j++){
-            if (y1 <= ys[j] && ys[j] < y2){
-                count[j] += delta;
-            }
-        }
-        
-        //cutLength 값을 계산한다
-        T cutLength = 0;
-        for(int j = 0; j < ys.size()-1; j++){
-            if(count[j] > 0)
-                cutLength += ys[j+1] - ys[j];
-        }
-        // 다음 이벤트까지의 거리에 cutLength를 곱한 값을 리턴한다
-        if(i + 1 < events.size())
-            ret += cutLength * (events[i+1].first - x);
+    for(auto & rec : rects){
+        rec.y1 = lower_bound(ys.begin(), ys.end(), rec.y1) - ys.begin();
+        rec.y2 = lower_bound(ys.begin(), ys.end(), rec.y2) - ys.begin();
     }
-    return ret;
-};
-
-int main(){
-    int N;
-    cin>>N;
-    vector<Rectangle<ll>> rects;
-    ll x1,x2,y1,y2;
-    while(N--){
-        cin>>x1>>x2>>y1>>y2;
-        rects.push_back(Rectangle<ll>(x1,y1,x2,y2));
-    }
-
-	cout<<unionArea<ll>(rects)<<endl;
-    return 0;
 }
 
+ll unionArea(){
+    // coordinate compression
+    compressCoordinate();
+
+    vector<Event> events;
+    for(int i = 0; i < rects.size(); i++){
+        events.push_back(Event(rects[i].x1,1,i));
+        events.push_back(Event(rects[i].x2,-1,i));
+    }
+
+    sort(events.begin(), events.end(), [](const Event & e1, const Event & e2){
+        return e1.x < e2.x;
+    });
+
+    SegTree t(ys.size()); // this value can be int(ys.size())+1
+    // printf(" l, r, events[0].x : %d, %d ,%d \n", rects[events[0].idx].y1, rects[events[0].idx].y2, events[0].x);
+    t.add(rects[events[0].idx].y1, rects[events[0].idx].y2, 1);
+    ll ret = 0;
+    for(int i = 1; i < events.size(); i++){
+        ll diff_x = events[i].x - events[i-1].x;
+        ret += diff_x * (1LL * t.query());
+        // printf("t.query(), diff_x, toadd  :  %d, %lld, %lld \n", t.query(), diff_x, diff_x * 1LL * t.query());
+        int l = rects[events[i].idx].y1;
+        int r = rects[events[i].idx].y2;
+        // printf("l,r, events[%d].x : %d, %d ,%d \n",i, l, r, events[i].x);
+        t.add(l,r,events[i].delta);
+    }
+    return ret;
+}
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    cin>>N;
+    int x1,y1,x2,y2;
+    for(int i = 0; i < N; i++){
+        cin>>x1>>x2>>y1>>y2;
+        rects.push_back(Rec(x1,x2,y1,y2));
+    }
+    
+    cout<<unionArea()<<endl;
+    
+    return 0;
+}
