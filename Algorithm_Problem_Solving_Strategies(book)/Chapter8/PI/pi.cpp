@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+#include <fstream>
 
 #define MAX_N 10000
 #define endl '\n'
@@ -61,16 +62,20 @@ int dp(int idx){
     return ret;
 }
 
-void solve(){
+int solve(){
     cin>>seq;
     //reset
     fill(cache, cache+seq.size(), 0);
     cout<<dp(0)<<endl;
+	return dp(0);
 }
 
 int main(){
+	ofstream fl;
+	fl.open("output.txt");
     int c;
     cin>>c;
-    while(c--) solve();
+    while(c--) fl<<solve()<<endl;
+	fl.close();
     return 0;
 }
