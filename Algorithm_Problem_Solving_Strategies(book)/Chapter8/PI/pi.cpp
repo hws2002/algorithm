@@ -2,7 +2,7 @@
 #include <cstring>
 #include <fstream>
 
-#define MAX_N 10000
+#define MAX_N 10002
 #define endl '\n'
 #define INF 2000000000
 using namespace std;
@@ -13,7 +13,6 @@ string seq;
 
 // seq[idx ~ idx + stp)를 외우는데 필요한 난이도
 int cost(int idx, int stp){
-    if( idx + stp > seq.size()) return 10;
     bool d1 = true;
     for(int i = idx+1; i < idx + stp; i++){
         if(seq[i] != seq[idx]) {d1 = false; break;}
@@ -22,9 +21,9 @@ int cost(int idx, int stp){
 
     bool d2 = true;
     for(int i = idx+2; i < idx + stp; i++){
-        if((seq[i] - seq[i-1]) != seq[1] - seq[0]){ d2 = false; break;}
+        if((seq[i] - seq[i-1]) != seq[idx + 1] - seq[idx]) { d2 = false; break;}
     }
-    if(d2 && abs(seq[1] - seq[0]) == 1) return 2;
+    if(d2 && abs(seq[idx+1] - seq[idx]) == 1) return 2;
 
     bool d4 = true;
     int l = seq[idx];
@@ -48,16 +47,40 @@ int cost(int idx, int stp){
     return 10;
 }
 
+
+int classify(int a, int b){
+	string M = seq.substr(a, b-a+1);
+	if( M == string(M.size(), M[0])) return 1;
+	bool progressive= true;
+	for(int i = 0 ; i < M.size() -1; i++)
+		if(M[i+1] -M[i] != M[1] - M[0])
+			progressive = false;
+	if(progressive && abs(M[1] - M[0])== 1)
+		return 2;
+
+	bool alternating = true;
+	for(int i = 0 ; i< M.size(); i++){
+		if(M[i] != M[i%2])
+			alternating = false;
+	}
+	if(alternating) return 4;
+	if(progressive) return 5;
+	return 10;
+}
+
 // dp(i) : i번쨰 숫자에서부터 외운다고 할때, 최소 난이도
 int dp(int idx){
     //base
     if(idx >= seq.size()) return 0;
     int & ret = cache[idx];
-    if(ret) return ret;
+    if(ret>-1) return ret;
     ret = INF;
     for(int stp = 3; stp <= 5; stp++){
         // printf("cost(%d, %d) %d \n", idx, stp, cost(idx,stp));
-        ret = min(ret, cost(idx, stp) + dp(idx + stp));
+		if( idx + stp <= seq.size())
+        	// ret = min(ret, classify(idx, idx+stp-1) + dp(idx + stp));
+		    ret = min(ret, cost(idx, stp) + dp(idx + stp));
+
     }
     return ret;
 }
@@ -65,7 +88,7 @@ int dp(int idx){
 int solve(){
     cin>>seq;
     //reset
-    fill(cache, cache+seq.size(), 0);
+    fill(cache, cache+seq.size(), -1);
     cout<<dp(0)<<endl;
 	return dp(0);
 }
