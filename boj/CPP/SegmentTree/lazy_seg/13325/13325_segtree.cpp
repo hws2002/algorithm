@@ -6,6 +6,7 @@
 // #define DEBUG_INPUT
 // #define DEBUG_DFS
 // #define DEBUG_ST
+#define endl '\n'
 #define INF 2'000'000'000
 
 using namespace std;
@@ -102,7 +103,10 @@ void dfs(int h){
 		rl = rl<<1;
 		rr = rr<<1 | 1;
 	}
-	if( h == rl) return ;
+	if( h == rl) { // leaf
+		ret += 1LL*t.query(h - num_leaf,h - num_leaf);
+		return ;
+	}
 #ifdef DEBUG_DFS
 	printf("rl, rr : %d, %d \n",rl ,rr);
 #endif
@@ -122,6 +126,9 @@ void dfs(int h){
 }
 
 int main(){
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
     cin>>k;
 	int mdist = -1; num_leaf = 1<<k;
 	
