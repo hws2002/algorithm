@@ -4,6 +4,7 @@ settings.json
 *.o
 *.out
 ref
+SCPC/
 
 
 program
