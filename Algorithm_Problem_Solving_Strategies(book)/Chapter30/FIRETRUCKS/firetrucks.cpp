@@ -5,7 +5,9 @@
 #define MAX_V 1000
 #define INF 1000000000
 
+#define endl '\n'
 using namespace std;
+typedef long long ll;
 
 int V,E;
 const int src = 0;
@@ -14,7 +16,7 @@ vector<pair<int,int>> adj[MAX_V+1];
 
 vector<int> dijkstra(int src){
     priority_queue< pair<int,int > > pq;
-    vector<int> dist(V,INF);
+    vector<int> dist(V+1,INF);
     pq.push({-0,src});
     dist[src] = 0;
     while(!pq.empty()){
@@ -32,9 +34,8 @@ vector<int> dijkstra(int src){
 }
 
 void solve(){
-    cin>>V>>E;
-    int n,m;
-    cin>>n>>m;
+	int n,m;
+    cin>>V>>E>>n>>m;
     for(int i = 0; i <= V; i++){
         adj[i].clear();
     }
@@ -52,15 +53,15 @@ void solve(){
         fireplace.push_back(a);
     }
     
-    for(int i = 0; i <m; i++){ // 소방서
+    for(int i = 0; i < m; i++){ // 소방서
         cin>>a;
         adj[src].push_back({a,0});
     }
     
     auto dist = dijkstra(src);
-    int ret = 0;
+    ll ret = 0;
     for(const auto & fp : fireplace){
-        ret += dist[fp];
+        ret += 1LL*dist[fp];
     }
     cout<<ret<<endl;
 }
