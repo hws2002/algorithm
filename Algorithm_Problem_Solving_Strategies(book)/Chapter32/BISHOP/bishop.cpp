@@ -2,7 +2,8 @@
 #include <cstring>
 #include <vector>
 
-#define MAX_N 64
+#define MAX_N 100
+#define endl '\n'
 using namespace std;
 int N;
 vector< vector<int> > board;
@@ -16,11 +17,11 @@ vector<int> bMatch;
 vector<bool> visited;
 
 bool isOccupiedL(int x, int y){
-    return coor2L[x][y] == -1;
+    return coor2L[x][y] > -1;
 }
 
 bool isOccupiedR(int x, int y){
-    return coor2R[x][y] == -1;
+    return coor2R[x][y] > -1;
 }
 
 bool placable(int x, int y){
@@ -28,11 +29,12 @@ bool placable(int x, int y){
     return false;
 }
 
+
 bool dfs(int a){
     if( visited[a] ) return false;
     visited[a] = true;
     for(const auto & b : adj[a]){
-        if( bMatch[b] == -1 || dfs(bMatch[b])){
+        if( bMatch[b] == -1 || dfs( bMatch[b])){
             aMatch[a] = b;
             bMatch[b] = a;
             return true;
@@ -41,12 +43,12 @@ bool dfs(int a){
     return false;
 }
 
-int bipartiteMatch(){
-    aMatch = vector<int> (lidx, -1);
-    bMatch = vector<int> (ridx, -1);
+int bipartiteMatch(int n, int m){
+    aMatch = vector<int> (n, -1);
+    bMatch = vector<int> (m, -1);
     int ret = 0;
-    for(int i = 0; i < lidx; i++){
-        visited = vector<bool> (lidx , false);
+    for(int i = 0; i < n; i++){
+        visited = vector<bool> (n , false);
         if(dfs(i)) ret++;
     }
     return ret;
@@ -89,13 +91,17 @@ void solve(){
                     coor2R[i][j] = ridx++;
                 }
                 
+				//add edges
                 adj[coor2L[i][j]].push_back( coor2R[i][j] );
+				// printf("adj[%d].push_back(%d) \n", coor2L[i][j], coor2R[i][j]);
             }
         }
     }
     
+	// cout<<"lidx , ridx : "<<lidx<<","<<ridx<<endl;
     //bipartiteMatch
-    cout<<bipartiteMatch()<<endl;
+    cout<<bipartiteMatch(lidx, ridx)<<endl;
+	for(int i = 0; i < lidx; i++) adj[i].clear();
 }
 
 int main(){
