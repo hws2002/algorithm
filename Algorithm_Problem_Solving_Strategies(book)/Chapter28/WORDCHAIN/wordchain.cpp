@@ -17,17 +17,17 @@ string s;
 
 vector<string> words;
 
-vector< pair<int, int> > adj[MAX_V];
+vector< int > adj[MAX_V];
 int sidx[26] = {0};
 vector<pair<int, int> > degree(MAX_V); // {in,out}
-vector<string> edges[26][26];
+vector<int> edges[26][26];
 
 void ecDfs(int here, vector<int> & path){
 #ifdef DEBUG_EC
     printf("here : %d %c \n", here, here + 'a');
 #endif
     while(sidx[here] < adj[here].size()){
-        int there = adj[here][ sidx[here] ].first;
+        int there = adj[here][ sidx[here] ];
         sidx[here]++;
         ecDfs(there, path);
     }
@@ -55,8 +55,8 @@ void solve(){
     for(int i = 0 ; i < n; i++){
         cin>>words[i];
 		int s = words[i][0] - 'a'; int e = words[i].back() - 'a';
-        adj[s].push_back({ e, i});
-		edges[s][e].push_back(words[i]);
+        adj[s].push_back(e);
+		edges[s][e].push_back(i);
 		degree[s].second++; // out
 		degree[e].first++; // in
     }
@@ -64,12 +64,12 @@ void solve(){
 #ifdef DEBUG_INPUT
 for(int i = 0 ; i< 26; i++){
 	if( adj[i].size() > 0){
-    printf("%d %c : ", i, i+'a');
-    for(const auto & p : adj[i]){
-        cout<<"{"<<p.first<<","<< words[p.second]<<"} ";
-    }
-    cout<<endl;
-}
+		printf("%d %c : ", i, i+'a');
+		for(const auto & p : adj[i]){
+			cout<<"{"<<p.first<<","<< words[p.second]<<"} ";
+		}
+		cout<<endl;
+	}
 }
 #endif
 	
@@ -77,9 +77,6 @@ for(int i = 0 ; i< 26; i++){
 	// check whether euler circuit exists
 	int s = -1; int e = -1; int src = -1;
 	for(int i = 0; i < 26; i++){
-		// cout<<"i : "<<i<<endl;
-		// cout<<"degree : "<<degree[i].first<<" "<<degree[i].second<<endl;
-
 		if( degree[i].first != -0 || degree[i].second != 0) src = i;
 		
 		if( abs(degree[i].first - degree[i].second) >= 2) {
@@ -103,7 +100,6 @@ for(int i = 0 ; i< 26; i++){
 			}
 			s = i;
 		}
-		// cout<<"s , e :"<<s<<" "<<e<<endl;
 	}
 	
 	if( s == -1 && e == -1){ // euler circuit
@@ -115,12 +111,11 @@ for(int i = 0 ; i< 26; i++){
             reverse( all(ec_vertex) );
 			for(int i = 1 ; i <= n; i++){
 				int v = ec_vertex[i]; int u = ec_vertex[i-1];
-				cout<< edges[u][v].back()<<" ";
+				cout<< words[edges[u][v].back()]<<" ";
 				edges[u][v].pop_back();
 			}
             cout<<endl; 
-        } else {
-			cout<<"IMPOSSIBLE"<<endl;
+			return ;
 		}
 	} else if ( s!= -1 && e != -1){ // euler trail
         vector<int> ec_vertex = getEulerCircuit(s);
@@ -128,16 +123,14 @@ for(int i = 0 ; i< 26; i++){
             reverse( all(ec_vertex) );
 			for(int i = 1 ; i <= n; i++){
 				int v = ec_vertex[i]; int u = ec_vertex[i-1];
-				cout<< edges[u][v].back()<<" ";
+				cout<< words[edges[u][v].back()]<<" ";
 				edges[u][v].pop_back();
 			}
             cout<<endl; 
-        } else {
-			cout<<"IMPOSSIBLE"<<endl;
+			return ;
 		}
-	} else {
-		cout<<"IMPOSSIBLE"<<endl;
-	}
+	} 
+	cout<<"IMPOSSIBLE"<<endl;
 }
 
 int main(){
