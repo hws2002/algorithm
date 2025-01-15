@@ -73,11 +73,10 @@ for(int i = 0 ; i< 26; i++){
 }
 #endif
 	
-	
 	// check whether euler circuit exists
 	int s = -1; int e = -1; int src = -1;
 	for(int i = 0; i < 26; i++){
-		if( degree[i].first != -0 || degree[i].second != 0) src = i;
+		if( degree[i].second != 0) src = i;
 		
 		if( abs(degree[i].first - degree[i].second) >= 2) {
 			cout<<"IMPOSSIBLE"<<endl;
@@ -102,34 +101,19 @@ for(int i = 0 ; i< 26; i++){
 		}
 	}
 	
-	if( s == -1 && e == -1){ // euler circuit
-#ifdef DEBUG_EC
-        printf("src : %d %c ", src, src+ 'a');
-#endif
-        vector<int> ec_vertex = getEulerCircuit(src);
-        if( ec_vertex.size() == n+1){
-            reverse( all(ec_vertex) );
-			for(int i = 1 ; i <= n; i++){
-				int v = ec_vertex[i]; int u = ec_vertex[i-1];
-				cout<< words[edges[u][v].back()]<<" ";
-				edges[u][v].pop_back();
-			}
-            cout<<endl; 
-			return ;
+ 	if ( s != -1 && e != -1) // euler trail
+		src = s;
+	vector<int> ec_vertex = getEulerCircuit(src);
+	if( ec_vertex.size() == n+1){
+		reverse( all(ec_vertex) );
+		for(int i = 1 ; i <= n; i++){
+			int v = ec_vertex[i]; int u = ec_vertex[i-1];
+			cout<< words[edges[u][v].back()]<<" ";
+			edges[u][v].pop_back();
 		}
-	} else if ( s!= -1 && e != -1){ // euler trail
-        vector<int> ec_vertex = getEulerCircuit(s);
-        if( ec_vertex.size() == n+1){
-            reverse( all(ec_vertex) );
-			for(int i = 1 ; i <= n; i++){
-				int v = ec_vertex[i]; int u = ec_vertex[i-1];
-				cout<< words[edges[u][v].back()]<<" ";
-				edges[u][v].pop_back();
-			}
-            cout<<endl; 
-			return ;
-		}
-	} 
+		cout<<endl; 
+		return ;
+	}
 	cout<<"IMPOSSIBLE"<<endl;
 }
 
