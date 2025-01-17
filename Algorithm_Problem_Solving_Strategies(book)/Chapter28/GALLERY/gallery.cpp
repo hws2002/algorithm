@@ -58,8 +58,6 @@ void solve(){
     cout<<ret<<endl;
 }
 
-
-
 int main(){
     int C;
     cin>>C;
